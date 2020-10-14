@@ -1,8 +1,23 @@
 window.onload = function(){
-  const two = new Two({width:900, height:900}).appendTo(document.getElementsByTagName('Body')[0]);
+  const twoWidth = 850;
+  const twoHeight = 480;
+  const playfieldWidth = twoWidth - 7;
+  const playfieldHeight = twoHeight - 7;
+  const leftBoundry = 40;
+  const rightBoundry = playfieldWidth - 32;
+  const topBoundry = 40;
+  const bottomBoundry = playfieldHeight - 32;
+  const two = new Two({width:twoWidth, height:twoHeight}).appendTo(document.getElementById('userInterface'));
+  const chat = document.createElement('div');
+  const inputBox = document.createElement('input');
+  inputBox.setAttribute('type', 'text');
+  inputBox.setAttribute('id', 'inputBox');
+  chat.setAttribute('id', 'chat');
+  document.getElementById('userInterface').append(chat);
+  document.getElementById('userInterface').append(inputBox);
 
-  const playfield = two.makeRectangle(450, 450, 850, 850);
-  const player = two.makeRectangle(450, 450, 50, 50);
+  const playfield = two.makeRectangle(twoWidth/2, twoHeight/2, playfieldWidth, playfieldHeight);
+  const player = two.makeRectangle(twoWidth/2, twoHeight/2, 50, 50);
 
   const upVector = new Two.Vector(0, -5);
   const downVector = new Two.Vector(0, 5);
@@ -24,6 +39,8 @@ window.onload = function(){
     {fill:color.fill, stroke:color.stroke, size:50});
   two.add(nameText);
 
+  inputBox.style.color = color.fill;
+
   playfield.fill = '#000000';
   playfield.stroke = '#555555';
   playfield.linewidth = 7;
@@ -34,16 +51,16 @@ window.onload = function(){
 
   document.addEventListener('keydown', function(event){
     console.log(event.key);
-    if(event.key == 'ArrowDown' && player.translation.y < 843){
+    if(event.key == 'ArrowDown' && player.translation.y < bottomBoundry){
       player.translation.addSelf(downVector);
     }
-    if(event.key == 'ArrowUp' && player.translation.y > 57){
+    if(event.key == 'ArrowUp' && player.translation.y > topBoundry){
       player.translation.addSelf(upVector);
     }
-    if(event.key == 'ArrowLeft' && player.translation.x > 57){
+    if(event.key == 'ArrowLeft' && player.translation.x > leftBoundry){
       player.translation.addSelf(leftVector);
     }
-    if(event.key == 'ArrowRight' && player.translation.x < 843){
+    if(event.key == 'ArrowRight' && player.translation.x < rightBoundry){
       player.translation.addSelf(rightVector);
     }
   });

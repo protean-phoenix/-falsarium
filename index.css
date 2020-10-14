@@ -2,3 +2,22 @@ body{
   background-color: #663399;
   color: #ffbd1b;
 }
+#chat{
+  width: 98.4%;
+  height: 300px;
+}
+#inputBox{
+  width: 100%;
+  font-size: 25px;
+}
+#userInterface{
+  margin-top: 50px;
+  margin-left: 50px;
+  width: 850px;
+}
+#chat, #inputBox{
+  background-color: #000000;
+  border-color: #555555;
+  border-width: 7px;
+  border-style: solid;
+}
