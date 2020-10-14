@@ -27,5 +27,9 @@ window.onload = function(){
   player.stroke = color.stroke;
   player.linewidth = 7;
 
-  two.update();
+  two.bind('update', function(frameCount){
+    if(frameCount > 5*60 && nameText.opacity > 0){
+      nameText.opacity -= 0.01;
+    }
+  }).play();
 };
