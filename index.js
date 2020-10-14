@@ -35,7 +35,8 @@ window.onload = function(){
   let color = colors.splice(Math.floor(Math.random()*colors.length), 1)[0];
   let animal = animals.splice(Math.floor(Math.random()*animals.length), 1)[0];
 
-  const nameText = new Two.Text('you are '+color.name+' '+animal+'.', 450, 100,
+  const fullName = color.name+' '+animal;
+  const nameText = new Two.Text('you are '+fullName+'.', 450, 100,
     {fill:color.fill, stroke:color.stroke, size:50});
   two.add(nameText);
 
@@ -63,6 +64,10 @@ window.onload = function(){
     if(event.key == 'ArrowRight' && player.translation.x < rightBoundry){
       player.translation.addSelf(rightVector);
     }
+    if(event.key == 'Enter' && document.activeElement === inputBox){
+      postToChat(inputBox.value);
+      inputBox.value = '';
+    }
   });
 
   two.bind('update', function(frameCount){
@@ -70,4 +75,16 @@ window.onload = function(){
       nameText.opacity -= 0.01;
     }
   }).play();
+
+  function postToChat(text){
+    const chatText = document.createElement('p');
+    chatText.innerHTML = fullName+': '+text;
+    chatText.style.color = color.fill;
+
+    chat.prepend(chatText);
+
+    while(chat.childElementCount > 9){
+      chat.removeChild(chat.childNodes[9]);
+    }
+  }
 };
