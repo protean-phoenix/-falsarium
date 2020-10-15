@@ -17,14 +17,30 @@ window.onload = function(){
   document.getElementById('userInterface').append(chat);
   document.getElementById('userInterface').append(inputBox);
 
-  let player = {};
-  let opponent = {};
+  let player = {player:true, topCollision:false, bottomCollision:false, leftCollision:false, rightCollision:false};
+  let opponentOne = {player:false, topCollision:false, bottomCollision:false, leftCollision:false, rightCollision:false};
+  let opponentTwo = {player:false, topCollision:false, bottomCollision:false, leftCollision:false, rightCollision:false};
+  let opponentThree = {player:false, topCollision:false, bottomCollision:false, leftCollision:false, rightCollision:false};
+  let opponentFour = {player:false, topCollision:false, bottomCollision:false, leftCollision:false, rightCollision:false};
+  let opponentFive = {player:false, topCollision:false, bottomCollision:false, leftCollision:false, rightCollision:false};
+  let opponentSix = {player:false, topCollision:false, bottomCollision:false, leftCollision:false, rightCollision:false};
+  let characters = [player, opponentOne, opponentTwo, opponentThree, opponentFour, opponentFive, opponentSix];
 
   const playfield = two.makeRectangle(twoWidth/2, twoHeight/2, playfieldWidth, playfieldHeight);
-  const playerSquare = two.makeRectangle(475, twoHeight/2, 50, 50);
-  const opponentSquare = two.makeRectangle(375, twoHeight/2, 50, 50);
+  const playerSquare = two.makeRectangle(425, 200, 50, 50);
+  const opponentOneSquare = two.makeRectangle(350, 200, 50, 50);
+  const opponentTwoSquare = two.makeRectangle(500, 200, 50, 50);
+  const opponentThreeSquare = two.makeRectangle(325, 275, 50, 50);
+  const opponentFourSquare = two.makeRectangle(400, 275, 50, 50);
+  const opponentFiveSquare = two.makeRectangle(475, 275, 50, 50);
+  const opponentSixSquare = two.makeRectangle(550, 275, 50, 50);
   player.square = playerSquare;
-  opponent.square = opponentSquare;
+  opponentOne.square = opponentOneSquare;
+  opponentTwo.square = opponentTwoSquare;
+  opponentThree.square = opponentThreeSquare;
+  opponentFour.square = opponentFourSquare;
+  opponentFive.square = opponentFiveSquare;
+  opponentSix.square = opponentSixSquare;
 
   const upVector = new Two.Vector(0, -5);
   const downVector = new Two.Vector(0, 5);
@@ -39,17 +55,25 @@ window.onload = function(){
     {name:'blue', fill:'#55AAFF', stroke:'#4488DD'},
     {name:'indigo', fill:'#5555FF', stroke:'#3333DD'},
     {name:'violet', fill:'#BBAAFF', stroke:'#9988DD'}];
-  let playerColor = colors.splice(Math.floor(Math.random()*colors.length), 1)[0];
-  let playerAnimal = animals.splice(Math.floor(Math.random()*animals.length), 1)[0];
-  player.color = playerColor;
-  player.animal = playerAnimal;
-  let opponentColor = colors.splice(Math.floor(Math.random()*colors.length), 1)[0];
-  let opponentAnimal = animals.splice(Math.floor(Math.random()*animals.length), 1)[0];
-  opponent.color = opponentColor;
-  opponent.animal = opponentAnimal;
 
-  opponent.fullName = opponent.color.name+' '+opponent.animal;
-  player.fullName = player.color.name+' '+player.animal;
+    for(let character of characters){
+      let characterColor = colors.splice(Math.floor(Math.random()*colors.length), 1)[0];
+      let characterAnimal = animals.splice(Math.floor(Math.random()*animals.length), 1)[0];
+      character.color = characterColor;
+      character.animal = characterAnimal;
+
+      character.square.fill = character.color.fill;
+      character.square.stroke = character.color.stroke;
+      character.square.linewidth = 7;
+
+      character.fullName = character.color.name+' '+character.animal;
+
+      if(character.player){
+        continue;
+      }
+      postToChat('glhf', character);
+    }
+
   const nameText = new Two.Text('you are '+player.fullName+'.', 450, 100,
     {fill:player.color.fill, stroke:player.color.stroke, size:50});
   two.add(nameText);
@@ -60,28 +84,21 @@ window.onload = function(){
   playfield.stroke = '#555555';
   playfield.linewidth = 7;
 
-  player.square.fill = player.color.fill;
-  player.square.stroke = player.color.stroke;
-  player.square.linewidth = 7;
-
-  opponent.square.fill = opponent.color.fill;
-  opponent.square.stroke = opponent.color.stroke;
-  opponent.square.linewidth = 7;
-
-  postToChat('glhf', opponent);
+  /**************************
+   * EVENT LISTENER SECTION *
+   **************************/
 
   document.addEventListener('keydown', function(event){
-    console.log(event.key);
-    if(event.key == 'ArrowDown' && player.square.translation.y < bottomBoundry){
+    if(event.key == 'ArrowDown' && player.square.translation.y < bottomBoundry && player.bottomCollision === false){
       player.square.translation.addSelf(downVector);
     }
-    if(event.key == 'ArrowUp' && player.square.translation.y > topBoundry){
+    if(event.key == 'ArrowUp' && player.square.translation.y > topBoundry && player.topCollision === false){
       player.square.translation.addSelf(upVector);
     }
-    if(event.key == 'ArrowLeft' && player.square.translation.x > leftBoundry){
+    if(event.key == 'ArrowLeft' && player.square.translation.x > leftBoundry && player.leftCollision === false){
       player.square.translation.addSelf(leftVector);
     }
-    if(event.key == 'ArrowRight' && player.square.translation.x < rightBoundry){
+    if(event.key == 'ArrowRight' && player.square.translation.x < rightBoundry && player.rightCollision === false){
       player.square.translation.addSelf(rightVector);
     }
     if(event.key == 'Enter' && document.activeElement === inputBox){
@@ -90,10 +107,15 @@ window.onload = function(){
     }
   });
 
+  /**********************
+   * TENSORFLOW SECTION *
+   **********************/
+
   two.bind('update', function(frameCount){
     if(frameCount > 5*60 && nameText.opacity > 0){
       nameText.opacity -= 0.01;
     }
+    collisionDetection();
   }).play();
 
   function postToChat(text, character){
@@ -105,6 +127,67 @@ window.onload = function(){
 
     while(chat.childElementCount > 9){
       chat.removeChild(chat.childNodes[9]);
+    }
+  }
+
+  function collisionDetection(){
+    let startCheck = 0;
+    for(let character of characters){
+      character.topCollision = false;
+      character.bottomCollision = false;
+      character.leftCollision = false;
+      character.rightCollision = false;
+    }
+    for(let i = 0; i < characters.length-1; i++){
+      startCheck++;
+      characterOneTop = characters[i].square.getBoundingClientRect()['top'];
+      characterOneBottom = characters[i].square.getBoundingClientRect()['bottom'];
+      characterOneLeft = characters[i].square.getBoundingClientRect()['left'];
+      characterOneRight = characters[i].square.getBoundingClientRect()['right'];
+
+      for(let j = startCheck; j < characters.length; j++){
+        characterTwoTop = characters[j].square.getBoundingClientRect()['top'];
+        characterTwoBottom = characters[j].square.getBoundingClientRect()['bottom'];
+        characterTwoLeft = characters[j].square.getBoundingClientRect()['left'];
+        characterTwoRight = characters[j].square.getBoundingClientRect()['right'];
+
+        if(((characterOneLeft >= characterTwoLeft &&
+        characterOneLeft <= characterTwoRight) ||
+        (characterOneRight >= characterTwoLeft &&
+        characterOneRight <= characterTwoRight)) &&
+        characterOneTop <= characterTwoBottom + 5 &&
+        characterOneTop >= characterTwoTop){
+          characters[i].topCollision = true;
+          characters[j].bottomCollision = true;
+        }
+        if(((characterOneLeft >= characterTwoLeft &&
+        characterOneLeft <= characterTwoRight) ||
+        (characterOneRight >= characterTwoLeft &&
+        characterOneRight <= characterTwoRight)) &&
+        characterOneBottom >= characterTwoTop - 5 &&
+        characterOneBottom <= characterTwoBottom){
+          characters[j].topCollision = true;
+          characters[i].bottomCollision = true;
+        }
+        if(((characterOneTop >= characterTwoTop &&
+        characterOneTop <= characterTwoBottom) ||
+        (characterOneBottom >= characterTwoTop &&
+        characterOneBottom <= characterTwoBottom)) &&
+        characterOneLeft <= characterTwoRight + 5 &&
+        characterOneLeft >= characterTwoLeft){
+          characters[i].leftCollision = true;
+          characters[j].rightCollision = true;
+        }
+        if(((characterOneTop >= characterTwoTop &&
+        characterOneTop <= characterTwoBottom) ||
+        (characterOneBottom >= characterTwoTop &&
+        characterOneBottom <= characterTwoBottom)) &&
+        characterOneRight >= characterTwoLeft - 5 &&
+        characterOneRight <= characterTwoRight){
+          characters[j].leftCollision = true;
+          characters[i].rightCollision = true;
+        }
+      }
     }
   }
 };
